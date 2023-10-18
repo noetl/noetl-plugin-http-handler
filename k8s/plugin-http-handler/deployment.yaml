@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plugin-http-handler
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: plugin-http-handler
+  name: plugin-http-handler
+  namespace: plugin-http-handler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plugin-http-handler
+  template:
+    metadata:
+      labels:
+        app: plugin-http-handler
+    spec:
+      containers:
+      - image: localnoetl/noetl-plugin-http-handler
+        name: plugin-http-handler
+        env:
+        - name: NATS_SERVER
+          value: 'nats://nats.nats.svc.cluster.local:4222'
