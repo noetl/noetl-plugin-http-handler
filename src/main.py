@@ -2,12 +2,12 @@ import asyncio
 from nats.aio.client import Client as NATS
 import httpx
 import json
+import os
 
 async def run(loop):
     nc = NATS()
-    await nc.connect(servers=["nats://nats-server:4222"], loop=loop)
+    await nc.connect(servers=[os.getenv("NATS_SERVER", "nats://nats-server:4222")], loop=loop)
 
-    # Register with NATS
     registration_payload = {
         "name": "http-request",
         "source_path": "https://github.com/noetl/noetl-plugin-http-handler.git",
@@ -20,7 +20,6 @@ async def run(loop):
     }
     await nc.publish("registration", json.dumps(registration_payload).encode())
 
-    # Subscribe to commands
     async def handle_command(msg):
         url = msg.data.decode()
         async with httpx.AsyncClient() as client:
@@ -32,7 +31,6 @@ async def run(loop):
 
     await nc.subscribe("commands", cb=handle_command)
 
-    # Keep running
     await asyncio.sleep(3600)
 
 if __name__ == '__main__':
